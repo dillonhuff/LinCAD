@@ -24,10 +24,30 @@ namespace LinCAD {
       for (auto cf : coeffs_) {
         coeffs.insert({cf.first, rational(std::to_string(cf.second))});
       }
+
+      remove_zero_coeffs();
     }
 
     linear_expression(const std::map<variable, rational>& coeffs_,
-                      const rational& c_) : coeffs(coeffs_), c(c_) {}
+                      const rational& c_) : coeffs(coeffs_), c(c_) {
+      remove_zero_coeffs();
+    }
+
+    linear_expression
+    evaluate_at(const std::map<variable, rational>& var_values) const;
+    
+    void remove_zero_coeffs() {
+      std::vector<variable> zero_vars;
+      for (auto cf : coeffs) {
+        if (cf.second.sign() == 0) {
+          zero_vars.push_back(cf.first);
+        }
+      }
+
+      for (auto v : zero_vars) {
+        coeffs.erase(v);
+      }
+    }
 
     rational get_const() const {
       return c;
@@ -51,7 +71,16 @@ namespace LinCAD {
 
       return true;
     }
+
   };
+
+  static inline
+  std::ostream&
+  operator<<(std::ostream& out, const linear_expression& l) {
+    // TODO: Fill in coeffs
+    out << l.get_const();
+    return out;
+  }
 
   static inline
   bool operator==(const linear_expression& x, const linear_expression& y) {

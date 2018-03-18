@@ -15,6 +15,6 @@ namespace LinCAD {
     linear_expression* lp = c.add_linear_expression({{x, 1}}, -5);
     linear_expression expected({}, rational("0"));
 
-    REQUIRE(evaluate_at(*lp, {{x, rational("5")}}) == expected);
+    REQUIRE(lp->evaluate_at({{x, rational("5")}}) == expected);
   }
 }
