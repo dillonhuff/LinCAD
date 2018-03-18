@@ -33,6 +33,29 @@ namespace LinCAD {
       remove_zero_coeffs();
     }
 
+    rational cof(const variable var) const {
+      if (!contains_key(var, coeffs)) {
+        return rational("0");
+      }
+
+      return map_find(var, coeffs);
+    }
+
+    linear_expression scalar_mul(const rational& r) const {
+      std::map<variable, rational> mul_coeffs;
+      for (auto cf : coeffs) {
+        mul_coeffs.insert({cf.first, cf.second*r});
+      }
+      return linear_expression(mul_coeffs, r*get_const());
+
+    }
+
+    linear_expression drop(const variable v) const {
+      std::map<variable, rational> dropped_coeffs = coeffs;
+      dropped_coeffs.erase(v);
+      return linear_expression(dropped_coeffs, get_const());
+    }
+
     linear_expression
     evaluate_at(const std::map<variable, rational>& var_values) const;
     
@@ -51,6 +74,28 @@ namespace LinCAD {
 
     rational get_const() const {
       return c;
+    }
+
+    linear_expression subtract(const linear_expression& other) const {
+
+      std::map<variable, rational> sub_coeffs;
+      for (auto cf : coeffs) {
+        if (contains_key(cf.first, other.coeffs)) {
+          sub_coeffs.insert({cf.first, cf.second - map_find(cf.first, other.coeffs)});
+        } else {
+          sub_coeffs.insert(cf);
+        }
+      }
+
+      for (auto other_cf : other.coeffs) {
+        if (!contains_key(other_cf.first, this->coeffs)) {
+          sub_coeffs.insert({other_cf.first, -other_cf.second});
+        }
+      }
+
+      rational cs = get_const() - other.get_const();
+
+      return linear_expression(sub_coeffs, cs);
     }
 
     bool equals(const linear_expression& other) const {
@@ -119,6 +164,13 @@ namespace LinCAD {
       return expr;
     }
 
+    linear_expression*
+    add_linear_expression(const linear_expression& l) {
+      linear_expression* expr = new linear_expression(l);
+      exprs.insert(expr);
+      return expr;
+    }
+    
     std::vector<linear_expression*>
     project_away(const std::vector<linear_expression*>& exprs,
                  const variable var);
