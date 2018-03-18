@@ -32,6 +32,11 @@ namespace LinCAD {
       c.project_away({xmy, mxy}, y);
 
     REQUIRE(proj_set.size() == 1);
-    
+
+    linear_expression* pj = proj_set[0];
+
+    REQUIRE(pj->cof(y).sign() == 0);
+
+    cout << "pj = " << *pj << endl;
   }
 }

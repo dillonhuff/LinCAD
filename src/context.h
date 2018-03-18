@@ -117,12 +117,23 @@ namespace LinCAD {
       return true;
     }
 
+    int num_non_zero_coeffs() const {
+      return coeffs.size();
+    }
+
+    std::map<variable, rational> coefficient_map() const {
+      return coeffs;
+    }
   };
 
   static inline
   std::ostream&
   operator<<(std::ostream& out, const linear_expression& l) {
     // TODO: Fill in coeffs
+    for (auto c : l.coefficient_map()) {
+      out << c.second << " * $v" << c.first << " + ";
+    }
+
     out << l.get_const();
     return out;
   }
