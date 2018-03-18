@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace lqe {
+namespace LinCAD {
 
   class rational {
   protected:

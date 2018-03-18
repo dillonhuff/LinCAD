@@ -11,7 +11,8 @@ SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CXX_GMP_LINK_FLAGS}")
 
 INCLUDE_DIRECTORIES(./src/)
 
-SET(LQE_CPPS src/rational.cpp)
+SET(LQE_CPPS src/rational.cpp
+             src/context.cpp)
 
 add_library(LinCAD ${LQE_CPPS})
 target_link_libraries(LinCAD GMP)
