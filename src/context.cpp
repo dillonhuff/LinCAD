@@ -22,4 +22,10 @@ namespace LinCAD {
     return linear_expression(un_evaluated, fresh_const);
   }
 
+  std::vector<linear_expression*>
+  context::project_away(const std::vector<linear_expression*>& exprs,
+                        const variable var) {
+    return {};
+  }
+  
 }

@@ -119,6 +119,10 @@ namespace LinCAD {
       return expr;
     }
 
+    std::vector<linear_expression*>
+    project_away(const std::vector<linear_expression*>& exprs,
+                 const variable var);
+
     ~context() {
       for (auto expr : exprs) {
         delete expr;
