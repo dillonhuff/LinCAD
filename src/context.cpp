@@ -6,6 +6,30 @@ using namespace std;
 
 namespace LinCAD {
 
+  std::vector<rational> build_test_points(const std::vector<rational>& sorted_roots) {
+    if (sorted_roots.size() == 0) {
+      return {rational("0")};
+    }
+
+    rational fst_root = sorted_roots.front();
+    rational last_root = sorted_roots.back();
+
+    vector<rational> test_points;
+    test_points.push_back(fst_root - rational("1"));
+
+    for (int i = 0; i < ((int) sorted_roots.size()); i++) {
+      test_points.push_back(sorted_roots[i]);
+
+      if (i < (((int)sorted_roots.size()) - 1)) {
+        test_points.push_back((sorted_roots[i] + sorted_roots[i + 1]) / rational("2"));
+      }
+    }
+
+    test_points.push_back(last_root - rational("1"));
+
+    return test_points;
+  }
+
   std::vector<rational>
   ordered_roots(const std::vector<linear_expression*>& base_set,
                 const map<variable, rational>& test_point) {
@@ -96,8 +120,15 @@ namespace LinCAD {
     
     vector<linear_expression*>& base_set = projection_sets.back();
     vector<rational> roots = ordered_roots(base_set, {});
+    
     cout << "Base roots" << endl;
     for (auto r : roots) {
+      cout << "\t" << r << endl;
+    }
+
+    vector<rational> test_points = build_test_points(roots);
+    cout << "Base test points" << endl;
+    for (auto r : test_points) {
       cout << "\t" << r << endl;
     }
     
