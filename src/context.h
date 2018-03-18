@@ -121,6 +121,11 @@ namespace LinCAD {
       return coeffs.size();
     }
 
+    rational get_only_non_zero_coeff() const {
+      assert(coeffs.size() == 1);
+      return begin(coeffs)->second;
+    }
+
     std::map<variable, rational> coefficient_map() const {
       return coeffs;
     }
@@ -145,6 +150,16 @@ namespace LinCAD {
 
   linear_expression evaluate_at(const linear_expression& l,
                                 const std::map<variable, rational>& var_values);
+
+  class sign_invariant_partition {
+
+    
+  public:
+    
+    int num_cells() const {
+      return 0;
+    }
+  };
 
   class context {
     std::set<linear_expression*> exprs;
@@ -185,6 +200,9 @@ namespace LinCAD {
     std::vector<linear_expression*>
     project_away(const std::vector<linear_expression*>& exprs,
                  const variable var);
+
+    sign_invariant_partition
+    build_sign_invariant_partition();
 
     ~context() {
       for (auto expr : exprs) {

@@ -11,6 +11,13 @@ namespace LinCAD {
     mpq_t val;
 
   public:
+
+    rational() {
+      mpq_init(val);
+      mpq_set_str(val, "0", 10);
+      mpq_canonicalize(val);
+    }
+
     rational(mpq_t tmp) {
       mpq_init(val);
       mpq_swap(val, tmp);
@@ -90,6 +97,10 @@ namespace LinCAD {
 
   inline bool operator!=(const rational& l, const rational& r) {
     return !(l == r);
+  }
+
+  inline bool operator<(const rational& l, const rational& r) {
+    return (l - r).sign() < 0;
   }
   
 }

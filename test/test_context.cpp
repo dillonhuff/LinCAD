@@ -36,7 +36,19 @@ namespace LinCAD {
     linear_expression* pj = proj_set[0];
 
     REQUIRE(pj->cof(y).sign() == 0);
+  }
 
-    cout << "pj = " << *pj << endl;
+  TEST_CASE("Do sign invariant decomposition") {
+    context c;
+    variable x = c.add_variable("x");
+    variable y = c.add_variable("y");
+
+    auto xmy = c.add_linear_expression({{x, 1}, {y, -1}}, 0);
+    auto mxy = c.add_linear_expression({{-x, 1}, {y, 1}}, 0);
+
+    sign_invariant_partition sid =
+      c.build_sign_invariant_partition();
+
+    REQUIRE(sid.num_cells() == 13);
   }
 }
