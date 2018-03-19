@@ -91,9 +91,24 @@ namespace LinCAD {
       c.solve_constraints();
 
     REQUIRE(model.has_value());
-
-    //auto test_pt = model.get_value();
-
   }
 
+  TEST_CASE("Two variable SAT") {
+    context c;
+
+    variable a = c.add_variable("a");
+    variable b = c.add_variable("b");
+
+    auto f0 = c.add_linear_expression({{a, 3}, {b, -2}}, -7);
+    auto f1 = c.add_linear_expression({{a, 5}, {b, 5}}, 4);
+
+    c.add_constraint(f0, EQUAL_ZERO);
+    c.add_constraint(f1, EQUAL_ZERO);
+
+    maybe<map<variable, rational> > model =
+      c.solve_constraints();
+
+    REQUIRE(model.has_value());
+  }
+  
 }

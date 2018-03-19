@@ -6,6 +6,16 @@ using namespace std;
 
 namespace LinCAD {
 
+  typedef std::map<variable, rational> test_pt;
+
+  void print_point(const test_pt& pt) {
+    cout << "( ";
+    for (auto val : pt) {
+      cout << "$v" << val.first << " -> " << val.second;
+    }
+    cout << " )";
+  }
+  
   std::vector<rational> build_test_points(const std::vector<rational>& sorted_roots) {
     if (sorted_roots.size() == 0) {
       return {rational("0")};
@@ -37,6 +47,11 @@ namespace LinCAD {
 
     for (auto expr : base_set) {
       linear_expression res = expr->evaluate_at(test_point);
+
+      cout << *expr << " at ";
+      print_point(test_point);
+      cout << " has value " << res << endl;
+
       assert(res.num_non_zero_coeffs() == 1);
       rational b = res.get_const();
       rational a = res.get_only_non_zero_coeff();
@@ -121,8 +136,13 @@ namespace LinCAD {
         linear_expression* lb = exprs[j];
 
         // Compute cof(var, lb)*drop(var, la) - cof(var, la)*drop(var, lb)
+        linear_expression lhs =
+          la->drop(var).scalar_mul(lb->cof(var));
+        linear_expression rhs =
+          lb->drop(var).scalar_mul(la->cof(var));
+
         linear_expression res =
-          la->drop(var).scalar_mul(lb->cof(var)).subtract(lb->drop(var).scalar_mul(la->cof(var)));
+          lhs.subtract(rhs);
           
         linear_expression* res_e = add_linear_expression(res);
         proj_set.push_back(res_e);
@@ -164,6 +184,9 @@ namespace LinCAD {
 
     map<variable, rational> test_point{};
 
+    // Q: Why does this need to be reversed?
+    reverse(variable_order);
+    
     cell* c = sid.get_root_cell();
     lift(projection_sets,
          variable_order,
@@ -175,15 +198,6 @@ namespace LinCAD {
   }
 
 
-  typedef std::map<variable, rational> test_pt;
-
-  void print_point(const test_pt& pt) {
-    cout << "( ";
-    for (auto val : pt) {
-      cout << "$v" << val.first << " -> " << val.second;
-    }
-    cout << " )";
-  }
   maybe<std::map<variable, rational> >
   context::solve_constraints() {
     set<linear_expression*> exprs;
