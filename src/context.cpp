@@ -110,7 +110,7 @@ namespace LinCAD {
     for (auto r : test_points) {
       map<variable, rational> fresh_test_point = test_point;
       fresh_test_point[var] = r;
-      cell* fresh_cell = cl->add_child();
+      cell* fresh_cell = cl->add_child(fresh_test_point);
       lift(projection_sets, variable_order, i - 1, fresh_test_point, fresh_cell);
     }
 
@@ -180,31 +180,6 @@ namespace LinCAD {
          test_point,
          c);
 
-
-    // for (int i = (projection_sets.size() - 1); i >= 0; i--) {
-    //   // Lifting procedure:
-    //   // substitute in test_point,
-    //   // find roots in 1d substitute system,
-    //   // create test points from root list
-    //   // for each test point:
-    //   //   create cell in decomp tree for that point
-    //   //   if i > 0: repeat lifting procedure on projection_set (i - 1)
-    //   vector<linear_expression*>& base_set = projection_sets.back();
-    //   vector<rational> roots = ordered_roots(base_set, {});
-
-    
-    //   cout << "Base roots" << endl;
-    //   for (auto r : roots) {
-    //     cout << "\t" << r << endl;
-    //   }
-
-    //   vector<rational> test_points = build_test_points(roots);
-    //   cout << "Base test points" << endl;
-    //   for (auto r : test_points) {
-    //     cout << "\t" << r << endl;
-    //   }
-    // }
-    
     return sid;
   }
 

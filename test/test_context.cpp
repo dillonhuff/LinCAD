@@ -50,5 +50,14 @@ namespace LinCAD {
       c.build_sign_invariant_partition();
 
     REQUIRE(sid.num_leaf_cells() == 13);
+
+    cout << "Test points" << endl;
+    for (auto pt : sid.test_points()) {
+      cout << "\t(";
+      for (auto val : pt) {
+        cout << val.second << ", ";
+      }
+      cout << " )" << endl;
+    }
   }
 }

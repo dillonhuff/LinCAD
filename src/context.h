@@ -153,8 +153,13 @@ namespace LinCAD {
 
   class cell {
 
-  public:
+    std::map<variable, rational> test_point;
     std::vector<cell*> children;
+    
+  public:
+
+    cell(const std::map<variable, rational>& test_point_) :
+      test_point(test_point_) {}
 
     int num_leaf_cells() const {
       if (children.size() == 0) {
@@ -168,11 +173,26 @@ namespace LinCAD {
 
       return total;
     }
-    cell* add_child() {
-      cell* c = new cell();
+
+    cell* add_child(const std::map<variable, rational>& test_pt) {
+      cell* c = new cell(test_pt);
       children.push_back(c);
 
       return c;
+    }
+
+    std::vector<std::map<variable, rational> > test_points() const {
+      if (children.size() == 0) {
+        return {test_point};
+      }
+
+      std::vector<std::map<variable, rational> > pts;
+      for (auto c : children) {
+        auto tp = c->test_points();
+        std::cout << "child has " << tp.size() << " test points" << std::endl;
+        concat(pts, tp);
+      }
+      return pts;
     }
 
     ~cell() {
@@ -188,7 +208,11 @@ namespace LinCAD {
     
   public:
 
-    sign_invariant_partition() : root() {}
+    sign_invariant_partition() : root({}) {}
+
+    std::vector<std::map<variable, rational> > test_points() const {
+      return root.test_points();
+    }
 
     cell* get_root_cell() { return &root; }
 
