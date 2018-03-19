@@ -17,7 +17,8 @@ SET(LQE_CPPS src/rational.cpp
 add_library(LinCAD ${LQE_CPPS})
 target_link_libraries(LinCAD GMP)
 
-SET(TEST_FILES ./test/test_context.cpp)
+SET(TEST_FILES ./test/test_context.cpp
+               ./test/test_sat.cpp)
 
 add_executable(all-tests ${TEST_FILES})
 target_link_libraries(all-tests LinCAD)
