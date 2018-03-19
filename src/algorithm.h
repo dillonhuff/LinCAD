@@ -788,6 +788,25 @@ namespace dbhc {
     return false;
   }
 
+  template<typename T>
+  class maybe {
+
+    T value;
+    bool has_val;
+
+  public:
+
+    maybe(const T& value_) : value(value_), has_val(true) {}
+    maybe() : has_val(false) {}
+                                                         
+    bool has_value() const { return has_val; }
+
+    T get_value() const {
+      assert(has_value());
+      return value;
+    }
+  };
+
 }
 
 #endif

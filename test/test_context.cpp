@@ -47,7 +47,7 @@ namespace LinCAD {
     auto mxy = c.add_linear_expression({{-x, 1}, {y, 1}}, 0);
 
     sign_invariant_partition sid =
-      c.build_sign_invariant_partition();
+      c.build_sign_invariant_partition({xmy, mxy});
 
     REQUIRE(sid.num_leaf_cells() == 13);
 
@@ -55,9 +55,45 @@ namespace LinCAD {
     for (auto pt : sid.test_points()) {
       cout << "\t(";
       for (auto val : pt) {
-        cout << val.second << ", ";
+        cout << "$v" << val.first << " -> " << val.second << ", ";
       }
       cout << " )" << endl;
     }
   }
+
+  TEST_CASE("Projecting away a horizontal line") {
+    context c;
+
+    variable x = c.add_variable("x");
+    variable y = c.add_variable("y");
+
+    auto xm3 = c.add_linear_expression({{x, 1}}, -3);
+
+    vector<linear_expression*> proj_set =
+      c.project_away({xm3}, y);
+
+    REQUIRE(proj_set.size() == 1);
+    
+  }
+
+  TEST_CASE("One variable SAT") {
+    context c;
+
+    variable a = c.add_variable("a");
+
+    auto p3xp4 = c.add_linear_expression({{a, 3}}, 0);
+    auto m2m7 = c.add_linear_expression({{a, 5}}, 0);
+
+    c.add_constraint(p3xp4, EQUAL_ZERO);
+    c.add_constraint(m2m7, EQUAL_ZERO);
+
+    maybe<map<variable, rational> > model =
+      c.solve_constraints();
+
+    REQUIRE(model.has_value());
+
+    //auto test_pt = model.get_value();
+
+  }
+
 }

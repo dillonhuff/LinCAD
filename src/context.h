@@ -189,7 +189,6 @@ namespace LinCAD {
       std::vector<std::map<variable, rational> > pts;
       for (auto c : children) {
         auto tp = c->test_points();
-        std::cout << "child has " << tp.size() << " test points" << std::endl;
         concat(pts, tp);
       }
       return pts;
@@ -221,14 +220,30 @@ namespace LinCAD {
     }
   };
 
+  enum value_constraint {
+    EQUAL_ZERO,
+    NOT_EQUAL_ZERO,
+    LESS_THAN_ZERO,
+    GREATER_THAN_ZERO,
+  };
+
+  typedef std::pair<linear_expression*, value_constraint> constraint;
+  
   class context {
     std::set<linear_expression*> exprs;
     std::map<int, std::string> var_names;
     variable next_var;
 
+    std::vector<constraint> active_constraints;
+
   public:
 
     context() : next_var(0) {}
+
+    void add_constraint(linear_expression* const l,
+                        const value_constraint c) {
+      active_constraints.push_back({l, c});
+    }
 
     variable add_variable(const std::string var_name) {
       variable nv = next_var;
@@ -262,7 +277,10 @@ namespace LinCAD {
                  const variable var);
 
     sign_invariant_partition
-    build_sign_invariant_partition();
+    build_sign_invariant_partition(const std::set<linear_expression*>& lin_exprs);
+
+    maybe<std::map<variable, rational> >
+    solve_constraints();
 
     ~context() {
       for (auto expr : exprs) {

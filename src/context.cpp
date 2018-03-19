@@ -81,21 +81,6 @@ namespace LinCAD {
 
     const vector<linear_expression*>& base_set = projection_sets[i];
     vector<rational> roots = ordered_roots(base_set, test_point);
-    // Here: order all functions in the base set
-
-    // vector<pair<linear_expression*, rational> > expr_values;
-    // for (auto r : roots) {
-    //   expr_values.
-    // }
-
-    // sort_lt(expr_values, [](const pair<linear_expression*, rational>& p) {
-    //     return p.second;
-    //   });
-    
-    // cout << "Base roots" << endl;
-    // for (auto r : roots) {
-    //   cout << "\t" << r << endl;
-    // }
 
     vector<rational> test_points = build_test_points(roots);
     cout << "Base test points" << endl;
@@ -103,10 +88,8 @@ namespace LinCAD {
       cout << "\t" << r << endl;
     }
 
-    //vector<vector<linear_expression*, rational> > values_at_roots;
-    
     variable var = variable_order[i];
-    //cout << "Lifting next dim" << endl;
+
     for (auto r : test_points) {
       map<variable, rational> fresh_test_point = test_point;
       fresh_test_point[var] = r;
@@ -120,10 +103,18 @@ namespace LinCAD {
   std::vector<linear_expression*>
   context::project_away(const std::vector<linear_expression*>& exprs,
                         const variable var) {
-    // TODO: Add expressions that do not depend on var (vertical lines wrt var)
 
-    // Add all possible root expressions
     vector<linear_expression*> proj_set;
+    // TODO: Add expressions that do not depend on var (vertical lines wrt var)
+    for (auto expr : exprs) {
+
+      if (expr->cof(var).sign() == 0) {
+        proj_set.push_back(expr);
+      }
+    }
+    
+    // Add all possible root expressions
+    
     for (int i = 0; i < (int) exprs.size(); i++) {
       linear_expression* la = exprs[i];
       for (int j = i + 1; j < (int) exprs.size(); j++) {
@@ -141,7 +132,7 @@ namespace LinCAD {
   }
 
   sign_invariant_partition
-  context::build_sign_invariant_partition() {
+  context::build_sign_invariant_partition(const std::set<linear_expression*>& lin_exprs) {
     // Choose variable order
     vector<variable> variable_order;
     for (int i = 0; i < next_var; i++) {
@@ -150,7 +141,7 @@ namespace LinCAD {
 
     // Projection phase: build each projection set
     vector<vector<linear_expression*> > projection_sets;
-    projection_sets.push_back(vector<linear_expression*>(begin(exprs), end(exprs)));
+    projection_sets.push_back(vector<linear_expression*>(begin(lin_exprs), end(lin_exprs)));
 
     for (int i = 1; i < variable_order.size(); i++) {
       variable var = variable_order[i];
@@ -182,5 +173,63 @@ namespace LinCAD {
 
     return sid;
   }
+
+
+  typedef std::map<variable, rational> test_pt;
+
+  void print_point(const test_pt& pt) {
+    cout << "( ";
+    for (auto val : pt) {
+      cout << "$v" << val.first << " -> " << val.second;
+    }
+    cout << " )";
+  }
+  maybe<std::map<variable, rational> >
+  context::solve_constraints() {
+    set<linear_expression*> exprs;
+    for (auto constraint : active_constraints) {
+      exprs.insert(constraint.first);
+    }
+
+    sign_invariant_partition sid =
+      build_sign_invariant_partition(exprs);
+
+    for (auto pt : sid.test_points()) {
+      bool satisfies_all_constraints = true;
+
+      
+      cout << "testing point ";
+      print_point(pt);
+      cout << endl;
+
+      for (auto con : active_constraints) {
+        value_constraint c = con.second;
+        linear_expression* expr = con.first;
+        linear_expression res = expr->evaluate_at(pt);
+
+        cout << *expr << " evaluates to " << res << endl;
+
+        assert(res.num_non_zero_coeffs() == 0);
+
+        if (c == EQUAL_ZERO) {
+          if (res.get_const().sign() == 0) {
+            
+          } else {
+            satisfies_all_constraints = false;
+            break;
+          }
+        } else {
+          assert(false);
+        }
+      }
+
+      if (satisfies_all_constraints) {
+        return maybe<test_pt>(pt);
+      }
+    }
+
+    return maybe<test_pt>();
+  }
+
 
 }
