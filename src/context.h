@@ -151,13 +151,49 @@ namespace LinCAD {
   linear_expression evaluate_at(const linear_expression& l,
                                 const std::map<variable, rational>& var_values);
 
+  class cell {
+
+  public:
+    std::vector<cell*> children;
+
+    int num_leaf_cells() const {
+      if (children.size() == 0) {
+        return 1;
+      }
+
+      int total = 0;
+      for (auto c : children) {
+        total += c->num_leaf_cells();
+      }
+
+      return total;
+    }
+    cell* add_child() {
+      cell* c = new cell();
+      children.push_back(c);
+
+      return c;
+    }
+
+    ~cell() {
+      for (auto c : children) {
+        delete c;
+      }
+    }
+  };
+
   class sign_invariant_partition {
 
+    cell root;
     
   public:
-    
-    int num_cells() const {
-      return 0;
+
+    sign_invariant_partition() : root() {}
+
+    cell* get_root_cell() { return &root; }
+
+    int num_leaf_cells() const {
+      return root.num_leaf_cells();
     }
   };
 

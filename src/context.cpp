@@ -25,7 +25,7 @@ namespace LinCAD {
       }
     }
 
-    test_points.push_back(last_root - rational("1"));
+    test_points.push_back(last_root + rational("1"));
 
     return test_points;
   }
@@ -62,6 +62,59 @@ namespace LinCAD {
     }
 
     return linear_expression(un_evaluated, fresh_const);
+  }
+
+  
+  void lift(const std::vector<std::vector<linear_expression*> >& projection_sets,
+            const std::vector<variable>& variable_order,
+            const int i,
+            const map<variable, rational>& test_point,
+            cell* cl) {
+
+    //cout << "i = " << i << endl;
+    assert(projection_sets.size() == variable_order.size());
+    assert(i <= ((int) projection_sets.size()));
+
+    if (i == -1) {
+      return;
+    }
+
+    const vector<linear_expression*>& base_set = projection_sets[i];
+    vector<rational> roots = ordered_roots(base_set, test_point);
+    // Here: order all functions in the base set
+
+    // vector<pair<linear_expression*, rational> > expr_values;
+    // for (auto r : roots) {
+    //   expr_values.
+    // }
+
+    // sort_lt(expr_values, [](const pair<linear_expression*, rational>& p) {
+    //     return p.second;
+    //   });
+    
+    // cout << "Base roots" << endl;
+    // for (auto r : roots) {
+    //   cout << "\t" << r << endl;
+    // }
+
+    vector<rational> test_points = build_test_points(roots);
+    cout << "Base test points" << endl;
+    for (auto r : test_points) {
+      cout << "\t" << r << endl;
+    }
+
+    //vector<vector<linear_expression*, rational> > values_at_roots;
+    
+    variable var = variable_order[i];
+    //cout << "Lifting next dim" << endl;
+    for (auto r : test_points) {
+      map<variable, rational> fresh_test_point = test_point;
+      fresh_test_point[var] = r;
+      cell* fresh_cell = cl->add_child();
+      lift(projection_sets, variable_order, i - 1, fresh_test_point, fresh_cell);
+    }
+
+    
   }
 
   std::vector<linear_expression*>
@@ -117,20 +170,40 @@ namespace LinCAD {
     // Base and lift phase: Solve one dimensional system wrt variable 0,
     // then back-substitute
     sign_invariant_partition sid;
-    
-    vector<linear_expression*>& base_set = projection_sets.back();
-    vector<rational> roots = ordered_roots(base_set, {});
-    
-    cout << "Base roots" << endl;
-    for (auto r : roots) {
-      cout << "\t" << r << endl;
-    }
 
-    vector<rational> test_points = build_test_points(roots);
-    cout << "Base test points" << endl;
-    for (auto r : test_points) {
-      cout << "\t" << r << endl;
-    }
+    map<variable, rational> test_point{};
+
+    cell* c = sid.get_root_cell();
+    lift(projection_sets,
+         variable_order,
+         ((int) projection_sets.size()) - 1,
+         test_point,
+         c);
+
+
+    // for (int i = (projection_sets.size() - 1); i >= 0; i--) {
+    //   // Lifting procedure:
+    //   // substitute in test_point,
+    //   // find roots in 1d substitute system,
+    //   // create test points from root list
+    //   // for each test point:
+    //   //   create cell in decomp tree for that point
+    //   //   if i > 0: repeat lifting procedure on projection_set (i - 1)
+    //   vector<linear_expression*>& base_set = projection_sets.back();
+    //   vector<rational> roots = ordered_roots(base_set, {});
+
+    
+    //   cout << "Base roots" << endl;
+    //   for (auto r : roots) {
+    //     cout << "\t" << r << endl;
+    //   }
+
+    //   vector<rational> test_points = build_test_points(roots);
+    //   cout << "Base test points" << endl;
+    //   for (auto r : test_points) {
+    //     cout << "\t" << r << endl;
+    //   }
+    // }
     
     return sid;
   }

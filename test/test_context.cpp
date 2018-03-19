@@ -49,6 +49,6 @@ namespace LinCAD {
     sign_invariant_partition sid =
       c.build_sign_invariant_partition();
 
-    REQUIRE(sid.num_cells() == 13);
+    REQUIRE(sid.num_leaf_cells() == 13);
   }
 }
